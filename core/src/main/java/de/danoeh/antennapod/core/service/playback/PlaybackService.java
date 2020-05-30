@@ -943,7 +943,7 @@ public class PlaybackService extends MediaBrowserServiceCompat {
         FeedItem nextItem;
         try {
             final List<FeedItem> queue = taskManager.getQueue();
-            nextItem = DBTasks.getQueueSuccessorOfItem(item.getId(), queue);
+            nextItem = DBTasks.getQueueTop(item.getId(), queue);
         } catch (InterruptedException e) {
             Log.e(TAG, "Error handling the queue in order to retrieve the next item", e);
             return null;
