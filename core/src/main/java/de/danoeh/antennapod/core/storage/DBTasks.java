@@ -324,6 +324,9 @@ public final class DBTasks {
                         result = iterator.next();
                     }
                     break;
+                } else {
+                    // return top item of queue
+                    return item;
                 }
             }
         }
