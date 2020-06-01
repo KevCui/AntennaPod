@@ -121,7 +121,7 @@ public class UserPreferences {
     private static final String PREF_FAST_FORWARD_SECS = "prefFastForwardSecs";
     private static final String PREF_REWIND_SECS = "prefRewindSecs";
     private static final String PREF_QUEUE_LOCKED = "prefQueueLocked";
-    private static final String IMAGE_CACHE_DEFAULT_VALUE = "100";
+    private static final String IMAGE_CACHE_DEFAULT_VALUE = "500";
     private static final int IMAGE_CACHE_SIZE_MINIMUM = 20;
     private static final String PREF_LEFT_VOLUME = "prefLeftVolume";
     private static final String PREF_RIGHT_VOLUME = "prefRightVolume";
@@ -291,7 +291,7 @@ public class UserPreferences {
      * @return {@code true} if download reports are shown, {@code false}  otherwise
      */
     public static boolean showDownloadReport() {
-        return prefs.getBoolean(PREF_SHOW_DOWNLOAD_REPORT, true);
+        return prefs.getBoolean(PREF_SHOW_DOWNLOAD_REPORT, false);
     }
 
     public static boolean showAutoDownloadReport() {
@@ -340,11 +340,11 @@ public class UserPreferences {
     }
 
     public static boolean isUnpauseOnBluetoothReconnect() {
-        return prefs.getBoolean(PREF_UNPAUSE_ON_BLUETOOTH_RECONNECT, false);
+        return prefs.getBoolean(PREF_UNPAUSE_ON_BLUETOOTH_RECONNECT, true);
     }
 
     public static boolean shouldHardwareButtonSkip() {
-        return prefs.getBoolean(PREF_HARDWARE_FOWARD_BUTTON_SKIPS, false);
+        return prefs.getBoolean(PREF_HARDWARE_FOWARD_BUTTON_SKIPS, true);
     }
 
     public static boolean shouldHardwarePreviousButtonRestart() {
@@ -364,14 +364,14 @@ public class UserPreferences {
         prefs.edit().putBoolean(UserPreferences.PREF_FOLLOW_QUEUE, value).apply();
     }
 
-    public static boolean shouldSkipKeepEpisode() { return prefs.getBoolean(PREF_SKIP_KEEPS_EPISODE, true); }
+    public static boolean shouldSkipKeepEpisode() { return prefs.getBoolean(PREF_SKIP_KEEPS_EPISODE, false); }
 
     public static boolean shouldFavoriteKeepEpisode() {
-        return prefs.getBoolean(PREF_FAVORITE_KEEPS_EPISODE, true);
+        return prefs.getBoolean(PREF_FAVORITE_KEEPS_EPISODE, false);
     }
 
     public static boolean isAutoDelete() {
-        return prefs.getBoolean(PREF_AUTO_DELETE, false);
+        return prefs.getBoolean(PREF_AUTO_DELETE, true);
     }
 
     public static int getSmartMarkAsPlayedSecs() {
@@ -379,7 +379,7 @@ public class UserPreferences {
     }
 
     public static boolean shouldDeleteRemoveFromQueue() {
-        return prefs.getBoolean(PREF_DELETE_REMOVES_FROM_QUEUE, false);
+        return prefs.getBoolean(PREF_DELETE_REMOVES_FROM_QUEUE, true);
     }
 
     public static float getPlaybackSpeed(MediaType mediaType) {
@@ -437,7 +437,7 @@ public class UserPreferences {
     }
 
     public static boolean shouldPauseForFocusLoss() {
-        return prefs.getBoolean(PREF_PAUSE_PLAYBACK_FOR_FOCUS_LOSS, false);
+        return prefs.getBoolean(PREF_PAUSE_PLAYBACK_FOR_FOCUS_LOSS, true);
     }
 
 
@@ -543,11 +543,11 @@ public class UserPreferences {
      * 'unlimited'.
      */
     public static int getEpisodeCacheSize() {
-        return readEpisodeCacheSizeInternal(prefs.getString(PREF_EPISODE_CACHE_SIZE, "20"));
+        return readEpisodeCacheSizeInternal(prefs.getString(PREF_EPISODE_CACHE_SIZE, "-1"));
     }
 
     public static boolean isEnableAutodownload() {
-        return prefs.getBoolean(PREF_ENABLE_AUTODL, false);
+        return prefs.getBoolean(PREF_ENABLE_AUTODL, true);
     }
 
     @VisibleForTesting
@@ -790,7 +790,7 @@ public class UserPreferences {
             }
         }
         // If this preference hasn't been set yet, return the default options
-        return new float[] { 0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f };
+        return new float[] { 0.75f, 1.0f, 1.25f, 1.4f, 1.5f, 1.75f, 2.0f };
     }
 
     public static String getMediaPlayer() {
@@ -997,7 +997,7 @@ public class UserPreferences {
     }
 
     public static boolean timeRespectsSpeed() {
-        return prefs.getBoolean(PREF_TIME_RESPECTS_SPEED, false);
+        return prefs.getBoolean(PREF_TIME_RESPECTS_SPEED, true);
     }
 
     public static boolean isStreamOverDownload() {
@@ -1014,7 +1014,7 @@ public class UserPreferences {
      * @see #getQueueKeepSortedOrder()
      */
     public static boolean isQueueKeepSorted() {
-        return prefs.getBoolean(PREF_QUEUE_KEEP_SORTED, false);
+        return prefs.getBoolean(PREF_QUEUE_KEEP_SORTED, true);
     }
 
     /**
@@ -1036,7 +1036,7 @@ public class UserPreferences {
      */
     public static SortOrder getQueueKeepSortedOrder() {
         String sortOrderStr = prefs.getString(PREF_QUEUE_KEEP_SORTED_ORDER, "use-default");
-        return SortOrder.parseWithDefault(sortOrderStr, SortOrder.DATE_NEW_OLD);
+        return SortOrder.parseWithDefault(sortOrderStr, SortOrder.FEED_TITLE_A_Z);
     }
 
     /**

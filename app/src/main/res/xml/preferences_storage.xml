@@ -12,21 +12,21 @@
             android:title="@string/pref_image_cache_size_title"
             android:key="prefImageCacheSize"
             android:summary="@string/pref_image_cache_size_sum"
-            android:defaultValue="100"/>
+            android:defaultValue="500"/>
     <SwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:enabled="true"
             android:key="prefAutoDelete"
             android:summary="@string/pref_auto_delete_sum"
             android:title="@string/pref_auto_delete_title"/>
     <SwitchPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:enabled="true"
             android:key="prefFavoriteKeepsEpisode"
             android:summary="@string/pref_favorite_keeps_episodes_sum"
             android:title="@string/pref_favorite_keeps_episodes_title"/>
     <SwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:enabled="true"
             android:key="prefDeleteRemovesFromQueue"
             android:summary="@string/pref_delete_removes_from_queue_sum"

@@ -30,7 +30,7 @@
                 android:key="prefParallelDownloads"
                 android:title="@string/pref_parallel_downloads_title"/>
         <SwitchPreference
-                android:defaultValue="true"
+                android:defaultValue="false"
                 android:enabled="true"
                 android:key="prefShowDownloadReport"
                 android:summary="@string/pref_showDownloadReport_sum"

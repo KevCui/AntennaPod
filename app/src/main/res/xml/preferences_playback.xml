@@ -16,14 +16,14 @@
                 android:summary="@string/pref_unpauseOnHeadsetReconnect_sum"
                 android:title="@string/pref_unpauseOnHeadsetReconnect_title"/>
         <SwitchPreference
-                android:defaultValue="false"
+                android:defaultValue="true"
                 android:enabled="true"
                 android:dependency="prefPauseOnHeadsetDisconnect"
                 android:key="prefUnpauseOnBluetoothReconnect"
                 android:summary="@string/pref_unpauseOnBluetoothReconnect_sum"
                 android:title="@string/pref_unpauseOnBluetoothReconnect_title"/>
         <SwitchPreference
-                android:defaultValue="false"
+                android:defaultValue="true"
                 android:enabled="true"
                 android:key="prefPauseForFocusLoss"
                 android:summary="@string/pref_pausePlaybackForFocusLoss_sum"
@@ -45,7 +45,7 @@
 
     <PreferenceCategory android:title="@string/playback_control">
         <SwitchPreference
-                android:defaultValue="false"
+                android:defaultValue="true"
                 android:enabled="true"
                 android:key="prefHardwareForwardButtonSkips"
                 android:summary="@string/pref_hardwareForwardButtonSkips_sum"
@@ -69,7 +69,7 @@
                 android:summary="@string/pref_playback_speed_sum"
                 android:title="@string/pref_playback_speed_title"/>
         <SwitchPreference
-                android:defaultValue="false"
+                android:defaultValue="true"
                 android:key="prefPlaybackTimeRespectsSpeed"
                 android:summary="@string/pref_playback_time_respects_speed_sum"
                 android:title="@string/pref_playback_time_respects_speed_title"/>
@@ -107,7 +107,7 @@
                 android:summary="@string/pref_smart_mark_as_played_sum"
                 android:title="@string/pref_smart_mark_as_played_title"/>
         <SwitchPreference
-                android:defaultValue="true"
+                android:defaultValue="false"
                 android:enabled="true"
                 android:key="prefSkipKeepsEpisode"
                 android:summary="@string/pref_skip_keeps_episodes_sum"
