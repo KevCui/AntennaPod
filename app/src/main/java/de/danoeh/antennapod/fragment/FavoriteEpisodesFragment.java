@@ -1,6 +1,7 @@
 package de.danoeh.antennapod.fragment;
 
 import android.os.Bundle;
+import android.view.Menu;
 import androidx.annotation.NonNull;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,6 +43,14 @@ public class FavoriteEpisodesFragment extends EpisodesListFragment {
         loadItems();
     }
 
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.findItem(R.id.filter_items).setVisible(false);
+        menu.findItem(R.id.mark_all_read_item).setVisible(false);
+        menu.findItem(R.id.remove_all_new_flags_item).setVisible(false);
+    }
+
     @NonNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,12 +62,14 @@ public class FavoriteEpisodesFragment extends EpisodesListFragment {
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0,
                 ItemTouchHelper.LEFT) {
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            public boolean onMove(@NonNull RecyclerView recyclerView,
+                                  @NonNull RecyclerView.ViewHolder viewHolder,
+                                  @NonNull RecyclerView.ViewHolder target) {
                 return false;
             }
 
             @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 EpisodeItemViewHolder holder = (EpisodeItemViewHolder) viewHolder;
                 Log.d(TAG, String.format("remove(%s)", holder.getFeedItem().getId()));
 

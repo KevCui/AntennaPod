@@ -512,6 +512,7 @@ public class PlaybackController {
                 new PlaybackServiceStarter(activity, media)
                         .startWhenPrepared(true)
                         .streamIfLastWasStream()
+                        .callEvenIfRunning(true)
                         .start();
                 Log.w(TAG, "Play/Pause button was pressed and PlaybackService state was unknown");
                 break;
@@ -599,6 +600,13 @@ public class PlaybackController {
     }
 
     public void setPlaybackSpeed(float speed) {
+        PlaybackPreferences.setCurrentlyPlayingTemporaryPlaybackSpeed(speed);
+        if (getMedia() != null && getMedia().getMediaType() == MediaType.VIDEO) {
+            UserPreferences.setVideoPlaybackSpeed(speed);
+        } else {
+            UserPreferences.setPlaybackSpeed(speed);
+        }
+
         if (playbackService != null) {
             playbackService.setSpeed(speed);
         } else {

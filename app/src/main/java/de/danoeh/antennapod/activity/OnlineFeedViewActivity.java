@@ -13,11 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
@@ -28,7 +23,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.adapter.FeedItemlistDescriptionAdapter;
-import de.danoeh.antennapod.core.ClientConfig;
 import de.danoeh.antennapod.core.dialog.DownloadRequestErrorDialogCreator;
 import de.danoeh.antennapod.core.event.DownloadEvent;
 import de.danoeh.antennapod.core.event.FeedListUpdateEvent;
@@ -61,6 +55,7 @@ import de.danoeh.antennapod.core.util.URLChecker;
 import de.danoeh.antennapod.core.util.playback.RemoteMedia;
 import de.danoeh.antennapod.core.util.syndication.FeedDiscoverer;
 import de.danoeh.antennapod.core.util.syndication.HtmlToPlainText;
+import de.danoeh.antennapod.databinding.OnlinefeedviewActivityBinding;
 import de.danoeh.antennapod.dialog.AuthenticationDialog;
 import de.danoeh.antennapod.discovery.PodcastSearcherRegistry;
 import io.reactivex.Observable;
@@ -101,26 +96,24 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
     private boolean didPressSubscribe = false;
 
     private Dialog dialog;
-    private ListView listView;
-    private Button subscribeButton;
-    private ProgressBar progressBar;
-    private Button stopPreviewButton;
 
     private Disposable download;
     private Disposable parser;
     private Disposable updater;
+
+    private OnlinefeedviewActivityBinding viewBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(UserPreferences.getTranslucentTheme());
         super.onCreate(savedInstanceState);
         StorageUtils.checkStorageAvailability(this);
-        setContentView(R.layout.onlinefeedview_activity);
-        listView = findViewById(R.id.listview);
-        progressBar = findViewById(R.id.progressBar);
 
-        findViewById(R.id.transparentBackground).setOnClickListener(v -> finish());
-        findViewById(R.id.card).setOnClickListener(null);
+        viewBinding = OnlinefeedviewActivityBinding.inflate(getLayoutInflater());
+        setContentView(viewBinding.getRoot());
+
+        viewBinding.transparentBackground.setOnClickListener(v -> finish());
+        viewBinding.card.setOnClickListener(null);
 
         String feedUrl = null;
         if (getIntent().hasExtra(ARG_FEEDURL)) {
@@ -166,8 +159,8 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
      * Displays a progress indicator.
      */
     private void setLoadingLayout() {
-        progressBar.setVisibility(View.VISIBLE);
-        findViewById(R.id.feedDisplay).setVisibility(View.GONE);
+        viewBinding.progressBar.setVisibility(View.VISIBLE);
+        viewBinding.feedDisplayContainer.setVisibility(View.GONE);
     }
 
     @Override
@@ -227,15 +220,14 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                Intent destIntent = new Intent(this, MainActivity.class);
-                if (NavUtils.shouldUpRecreateTask(this, destIntent)) {
-                    startActivity(destIntent);
-                } else {
-                    NavUtils.navigateUpFromSameTask(this);
-                }
-                return true;
+        if (item.getItemId() == android.R.id.home) {
+            Intent destIntent = new Intent(this, MainActivity.class);
+            if (NavUtils.shouldUpRecreateTask(this, destIntent)) {
+                startActivity(destIntent);
+            } else {
+                NavUtils.navigateUpFromSameTask(this);
+            }
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -390,27 +382,20 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
      * This method is executed on the GUI thread.
      */
     private void showFeedInformation(final Feed feed, Map<String, String> alternateFeedUrls) {
-        progressBar.setVisibility(View.GONE);
-        findViewById(R.id.feedDisplay).setVisibility(View.VISIBLE);
+        viewBinding.progressBar.setVisibility(View.GONE);
+        viewBinding.feedDisplayContainer.setVisibility(View.VISIBLE);
         this.feed = feed;
         this.selectedDownloadUrl = feed.getDownload_url();
 
-        ImageView cover = findViewById(R.id.imgvCover);
-        ImageView headerBackground = findViewById(R.id.imgvBackground);
-        headerBackground.setColorFilter(new LightingColorFilter(0xff828282, 0x000000));
-        TextView title = findViewById(R.id.txtvTitle);
-        TextView author = findViewById(R.id.txtvAuthor);
-        Spinner spAlternateUrls = findViewById(R.id.spinnerAlternateUrls);
+        viewBinding.backgroundImage.setColorFilter(new LightingColorFilter(0xff828282, 0x000000));
 
         View header = View.inflate(this, R.layout.onlinefeedview_header, null);
-        listView.addHeaderView(header);
-        listView.setSelector(android.R.color.transparent);
-        listView.setAdapter(new FeedItemlistDescriptionAdapter(this, 0, feed.getItems()));
+
+        viewBinding.listView.addHeaderView(header);
+        viewBinding.listView.setSelector(android.R.color.transparent);
+        viewBinding.listView.setAdapter(new FeedItemlistDescriptionAdapter(this, 0, feed.getItems()));
 
         TextView description = header.findViewById(R.id.txtvDescription);
-
-        subscribeButton = findViewById(R.id.butSubscribe);
-        stopPreviewButton = findViewById(R.id.butStopPreview);
 
         if (StringUtils.isNotBlank(feed.getImageUrl())) {
             Glide.with(this)
@@ -421,7 +406,7 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
                         .diskCacheStrategy(ApGlideSettings.AP_DISK_CACHE_STRATEGY)
                         .fitCenter()
                         .dontAnimate())
-                    .into(cover);
+                    .into(viewBinding.coverImage);
             Glide.with(this)
                     .load(feed.getImageUrl())
                     .apply(new RequestOptions()
@@ -430,14 +415,14 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
                             .diskCacheStrategy(ApGlideSettings.AP_DISK_CACHE_STRATEGY)
                             .transform(new FastBlurTransformation())
                             .dontAnimate())
-                    .into(headerBackground);
+                    .into(viewBinding.backgroundImage);
         }
 
-        title.setText(feed.getTitle());
-        author.setText(feed.getAuthor());
+        viewBinding.titleLabel.setText(feed.getTitle());
+        viewBinding.authorLabel.setText(feed.getAuthor());
         description.setText(feed.getDescription());
 
-        subscribeButton.setOnClickListener(v -> {
+        viewBinding.subscribeButton.setOnClickListener(v -> {
             if (feedInFeedlist(feed)) {
                 openFeed();
             } else {
@@ -455,7 +440,7 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
             }
         });
 
-        stopPreviewButton.setOnClickListener(v -> {
+        viewBinding.stopPreviewButton.setOnClickListener(v -> {
             PlaybackPreferences.writeNoMediaPlaying();
             IntentUtils.sendLocalBroadcast(this, PlaybackService.ACTION_SHUTDOWN_PLAYBACK_SERVICE);
         });
@@ -472,9 +457,9 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
         });
 
         if (alternateFeedUrls.isEmpty()) {
-            spAlternateUrls.setVisibility(View.GONE);
+            viewBinding.alternateUrlsSpinner.setVisibility(View.GONE);
         } else {
-            spAlternateUrls.setVisibility(View.VISIBLE);
+            viewBinding.alternateUrlsSpinner.setVisibility(View.VISIBLE);
 
             final List<String> alternateUrlsList = new ArrayList<>();
             final List<String> alternateUrlsTitleList = new ArrayList<>();
@@ -489,8 +474,8 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
             }
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, alternateUrlsTitleList);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spAlternateUrls.setAdapter(adapter);
-            spAlternateUrls.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            viewBinding.alternateUrlsSpinner.setAdapter(adapter);
+            viewBinding.alternateUrlsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     selectedDownloadUrl = alternateUrlsList.get(position);
@@ -509,24 +494,26 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
         // feed.getId() is always 0, we have to retrieve the id from the feed list from
         // the database
         Intent intent = MainActivity.getIntentToOpenFeed(this, getFeedId(feed));
+        intent.putExtra(MainActivity.EXTRA_STARTED_FROM_SEARCH,
+                getIntent().getBooleanExtra(MainActivity.EXTRA_STARTED_FROM_SEARCH, false));
         finish();
         startActivity(intent);
     }
 
     private void handleUpdatedFeedStatus(Feed feed) {
-        if (subscribeButton != null && feed != null) {
+        if (feed != null) {
             if (DownloadRequester.getInstance().isDownloadingFile(feed.getDownload_url())) {
-                subscribeButton.setEnabled(false);
-                subscribeButton.setText(R.string.subscribing_label);
+                viewBinding.subscribeButton.setEnabled(false);
+                viewBinding.subscribeButton.setText(R.string.subscribing_label);
             } else if (feedInFeedlist(feed)) {
-                subscribeButton.setEnabled(true);
-                subscribeButton.setText(R.string.open_podcast);
+                viewBinding.subscribeButton.setEnabled(true);
+                viewBinding.subscribeButton.setText(R.string.open_podcast);
                 if (didPressSubscribe) {
                     openFeed();
                 }
             } else {
-                subscribeButton.setEnabled(true);
-                subscribeButton.setText(R.string.subscribe_label);
+                viewBinding.subscribeButton.setEnabled(true);
+                viewBinding.subscribeButton.setText(R.string.subscribe_label);
             }
         }
     }
@@ -561,13 +548,11 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.error_label);
             if (errorMsg != null) {
-                builder.setMessage(getString(R.string.error_msg_prefix) + errorMsg);
+                builder.setMessage(errorMsg);
             } else {
-                builder.setMessage(R.string.error_msg_prefix);
+                builder.setMessage(R.string.download_error_error_unknown);
             }
-            builder.setPositiveButton(android.R.string.ok,
-                    (dialog, which) -> dialog.cancel()
-            );
+            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.cancel());
             builder.setOnDismissListener(dialog -> {
                 setResult(RESULT_ERROR);
                 finish();
@@ -583,7 +568,7 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
     public void playbackStateChanged(PlayerStatusEvent event) {
         boolean isPlayingPreview =
                 PlaybackPreferences.getCurrentlyPlayingMediaType() == RemoteMedia.PLAYABLE_TYPE_REMOTE_MEDIA;
-        stopPreviewButton.setVisibility(isPlayingPreview ? View.VISIBLE : View.GONE);
+        viewBinding.stopPreviewButton.setVisibility(isPlayingPreview ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -608,9 +593,8 @@ public class OnlineFeedViewActivity extends AppCompatActivity {
         }
 
         final List<String> titles = new ArrayList<>();
-        final List<String> urls = new ArrayList<>();
 
-        urls.addAll(urlsMap.keySet());
+        final List<String> urls = new ArrayList<>(urlsMap.keySet());
         for (String url : urls) {
             titles.add(urlsMap.get(url));
         }

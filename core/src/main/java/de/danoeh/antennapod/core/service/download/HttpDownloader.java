@@ -71,6 +71,7 @@ public class HttpDownloader extends Downloader {
                 // set header explicitly so that okhttp doesn't do transparent gzip
                 Log.d(TAG, "addHeader(\"Accept-Encoding\", \"identity\")");
                 httpReq.addHeader("Accept-Encoding", "identity");
+                httpReq.cacheControl(new CacheControl.Builder().noCache().build()); // noStore breaks CDNs
             }
 
             if (!TextUtils.isEmpty(request.getLastModified())) {
@@ -190,7 +191,7 @@ public class HttpDownloader extends Downloader {
             }
 
             byte[] buffer = new byte[BUFFER_SIZE];
-            int count = 0;
+            int count;
             request.setStatusMsg(R.string.download_running);
             Log.d(TAG, "Getting size of download");
             request.setSize(responseBody.contentLength() + request.getSoFar());
@@ -259,7 +260,6 @@ public class HttpDownloader extends Downloader {
             onFail(DownloadError.ERROR_CONNECTION_ERROR, request.getSource());
         } finally {
             IOUtils.closeQuietly(out);
-            AntennapodHttpClient.cleanup();
             IOUtils.closeQuietly(responseBody);
         }
     }

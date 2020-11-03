@@ -45,23 +45,22 @@ public class AllEpisodesFragment extends EpisodesListFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (!super.onOptionsItemSelected(item)) {
-            switch (item.getItemId()) {
-                case R.id.filter_items:
-                    showFilterDialog();
-                    return true;
-                default:
-                    return false;
+            if (item.getItemId() == R.id.filter_items) {
+                showFilterDialog();
+                return true;
             }
+            return false;
         } else {
             return true;
         }
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
         menu.findItem(R.id.filter_items).setVisible(true);
         menu.findItem(R.id.mark_all_read_item).setVisible(true);
+        menu.findItem(R.id.remove_all_new_flags_item).setVisible(false);
     }
 
     @Override
@@ -69,7 +68,7 @@ public class AllEpisodesFragment extends EpisodesListFragment {
         super.onFragmentLoaded(episodes);
 
         if (feedItemFilter.getValues().length > 0) {
-            txtvInformation.setText("{fa-info-circle} " + this.getString(R.string.filtered_label));
+            txtvInformation.setText("{md-info-outline} " + this.getString(R.string.filtered_label));
             Iconify.addIcons(txtvInformation);
             txtvInformation.setVisibility(View.VISIBLE);
         } else {
@@ -89,6 +88,18 @@ public class AllEpisodesFragment extends EpisodesListFragment {
         };
 
         filterDialog.openDialog();
+    }
+
+    @Override
+    protected boolean shouldUpdatedItemRemainInList(FeedItem item) {
+        SharedPreferences prefs = getActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        FeedItemFilter feedItemFilter = new FeedItemFilter(prefs.getString(PREF_FILTER, ""));
+
+        if (feedItemFilter.isShowDownloaded() && (!item.hasMedia() || !item.getMedia().isDownloaded())) {
+            return false;
+        }
+
+        return true;
     }
 
     @NonNull

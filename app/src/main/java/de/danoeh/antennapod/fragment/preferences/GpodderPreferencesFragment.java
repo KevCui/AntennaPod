@@ -3,9 +3,11 @@ package de.danoeh.antennapod.fragment.preferences;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import androidx.core.text.HtmlCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import android.text.Html;
+
+import android.text.Spanned;
 import android.text.format.DateUtils;
 import android.widget.Toast;
 import com.google.android.material.snackbar.Snackbar;
@@ -28,7 +30,6 @@ public class GpodderPreferencesFragment extends PreferenceFragmentCompat {
     private static final String PREF_GPODNET_FORCE_FULL_SYNC = "pref_gpodnet_force_full_sync";
     private static final String PREF_GPODNET_LOGOUT = "pref_gpodnet_logout";
     private static final String PREF_GPODNET_HOSTNAME = "pref_gpodnet_hostname";
-    private static final String PREF_GPODNET_NOTIFICATIONS = "pref_gpodnet_notifications";
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -110,12 +111,12 @@ public class GpodderPreferencesFragment extends PreferenceFragmentCompat {
         findPreference(PREF_GPODNET_SYNC).setEnabled(loggedIn);
         findPreference(PREF_GPODNET_FORCE_FULL_SYNC).setEnabled(loggedIn);
         findPreference(PREF_GPODNET_LOGOUT).setEnabled(loggedIn);
-        findPreference(PREF_GPODNET_NOTIFICATIONS).setEnabled(loggedIn);
         if (loggedIn) {
             String format = getActivity().getString(R.string.pref_gpodnet_login_status);
             String summary = String.format(format, GpodnetPreferences.getUsername(),
                     GpodnetPreferences.getDeviceID());
-            findPreference(PREF_GPODNET_LOGOUT).setSummary(Html.fromHtml(summary));
+            Spanned formattedSummary = HtmlCompat.fromHtml(summary, HtmlCompat.FROM_HTML_MODE_LEGACY);
+            findPreference(PREF_GPODNET_LOGOUT).setSummary(formattedSummary);
             updateLastGpodnetSyncReport(SyncService.isLastSyncSuccessful(getContext()),
                     SyncService.getLastSyncAttempt(getContext()));
         } else {

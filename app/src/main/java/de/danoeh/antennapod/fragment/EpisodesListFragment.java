@@ -6,10 +6,13 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,7 +75,6 @@ public abstract class EpisodesListFragment extends Fragment {
     List<FeedItem> episodes = new ArrayList<>();
 
     private volatile boolean isUpdatingFeeds;
-    private boolean isMenuVisible = true;
     protected Disposable disposable;
     protected TextView txtvInformation;
 
@@ -90,7 +92,6 @@ public abstract class EpisodesListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        setHasOptionsMenu(true);
         registerForContextMenu(recyclerView);
     }
 
@@ -114,24 +115,12 @@ public abstract class EpisodesListFragment extends Fragment {
             () -> DownloadService.isRunning && DownloadRequester.getInstance().isDownloadingFeeds();
 
     @Override
-    public void setMenuVisibility(final boolean visible) {
-        super.setMenuVisibility(visible);
-        isMenuVisible = visible;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if (!isAdded()) {
-            return;
-        }
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.episodes, menu);
-        MenuItemUtils.setupSearchItem(menu, (MainActivity) getActivity(), 0);
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
         isUpdatingFeeds = MenuItemUtils.updateRefreshMenuItem(menu, R.id.refresh_item, updateRefreshMenuItemChecker);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (!super.onOptionsItemSelected(item)) {
             switch (item.getItemId()) {
                 case R.id.refresh_item:
@@ -176,7 +165,7 @@ public abstract class EpisodesListFragment extends Fragment {
     }
 
     @Override
-    public boolean onContextItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
         Log.d(TAG, "onContextItemSelected() called with: " + "item = [" + item + "]");
         if (!getUserVisibleHint()) {
             return false;
@@ -213,6 +202,13 @@ public abstract class EpisodesListFragment extends Fragment {
         if (animator instanceof SimpleItemAnimator) {
             ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
         }
+
+        SwipeRefreshLayout swipeRefreshLayout = root.findViewById(R.id.swipeRefresh);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            AutoUpdateManager.runImmediate(requireContext());
+            new Handler(Looper.getMainLooper()).postDelayed(() -> swipeRefreshLayout.setRefreshing(false),
+                    getResources().getInteger(R.integer.swipe_to_refresh_duration_in_ms));
+        });
 
         progLoading = root.findViewById(R.id.progLoading);
         progLoading.setVisibility(View.VISIBLE);
@@ -278,8 +274,8 @@ public abstract class EpisodesListFragment extends Fragment {
         if (restoreScrollPosition) {
             recyclerView.restoreScrollPosition(getPrefName());
         }
-        if (isMenuVisible && isUpdatingFeeds != updateRefreshMenuItemChecker.isRefreshing()) {
-            requireActivity().invalidateOptionsMenu();
+        if (isUpdatingFeeds != updateRefreshMenuItemChecker.isRefreshing()) {
+            ((PagedToolbarFragment) getParentFragment()).invalidateOptionsMenuIfActive(this);
         }
     }
 
@@ -333,8 +329,8 @@ public abstract class EpisodesListFragment extends Fragment {
     public void onEventMainThread(DownloadEvent event) {
         Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");
         DownloaderUpdate update = event.update;
-        if (isMenuVisible && event.hasChangedFeedUpdateStatus(isUpdatingFeeds)) {
-            requireActivity().invalidateOptionsMenu();
+        if (event.hasChangedFeedUpdateStatus(isUpdatingFeeds)) {
+            ((PagedToolbarFragment) getParentFragment()).invalidateOptionsMenuIfActive(this);
         }
         if (update.mediaIds.length > 0) {
             for (long mediaId : update.mediaIds) {
@@ -348,8 +344,8 @@ public abstract class EpisodesListFragment extends Fragment {
 
     private void updateUi() {
         loadItems();
-        if (isMenuVisible && isUpdatingFeeds != updateRefreshMenuItemChecker.isRefreshing()) {
-            requireActivity().invalidateOptionsMenu();
+        if (isUpdatingFeeds != updateRefreshMenuItemChecker.isRefreshing()) {
+            ((PagedToolbarFragment) getParentFragment()).invalidateOptionsMenuIfActive(this);
         }
     }
 
@@ -380,6 +376,7 @@ public abstract class EpisodesListFragment extends Fragment {
                     hasMoreItems = true;
                     episodes = data;
                     onFragmentLoaded(episodes);
+                    ((PagedToolbarFragment) getParentFragment()).invalidateOptionsMenuIfActive(this);
                 }, error -> Log.e(TAG, Log.getStackTraceString(error)));
     }
 

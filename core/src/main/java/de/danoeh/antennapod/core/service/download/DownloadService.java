@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -178,7 +179,7 @@ public class DownloadService extends Service {
     public void onCreate() {
         Log.d(TAG, "Service started");
         isRunning = true;
-        handler = new Handler();
+        handler = new Handler(Looper.getMainLooper());
         notificationManager = new DownloadServiceNotification(this);
 
         IntentFilter cancelDownloadReceiverFilter = new IntentFilter();
@@ -218,9 +219,9 @@ public class DownloadService extends Service {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        cancelNotificationUpdater();
         syncExecutor.shutdown();
         schedExecutor.shutdown();
-        cancelNotificationUpdater();
         if (downloadPostFuture != null) {
             downloadPostFuture.cancel(true);
         }
@@ -639,6 +640,7 @@ public class DownloadService extends Service {
             if (n != null) {
                 NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 nm.notify(R.id.notification_downloading, n);
+                Log.d(TAG, "Download progress notification was posted");
             }
         }
     }

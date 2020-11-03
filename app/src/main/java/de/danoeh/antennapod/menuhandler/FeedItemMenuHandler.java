@@ -2,13 +2,14 @@ package de.danoeh.antennapod.menuhandler;
 
 import android.content.Context;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.fragment.app.Fragment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.android.material.snackbar.Snackbar;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.activity.MainActivity;
 import de.danoeh.antennapod.core.feed.FeedItem;
@@ -23,6 +24,7 @@ import de.danoeh.antennapod.core.sync.model.EpisodeAction;
 import de.danoeh.antennapod.core.util.FeedItemUtil;
 import de.danoeh.antennapod.core.util.IntentUtils;
 import de.danoeh.antennapod.core.util.ShareUtils;
+import de.danoeh.antennapod.dialog.ShareDialog;
 
 /**
  * Handles interactions with the FeedItemMenu.
@@ -61,20 +63,9 @@ public class FeedItemMenuHandler {
         }
         if (!ShareUtils.hasLinkToShare(selectedItem)) {
             setItemVisibility(menu, R.id.visit_website_item, false);
-            setItemVisibility(menu, R.id.share_link_item, false);
-            setItemVisibility(menu, R.id.share_link_with_position_item, false);
-        }
-        if (!hasMedia || selectedItem.getMedia().getDownload_url() == null) {
-            setItemVisibility(menu, R.id.share_download_url_item, false);
-            setItemVisibility(menu, R.id.share_download_url_with_position_item, false);
-        }
-        if(!hasMedia || selectedItem.getMedia().getPosition() <= 0) {
-            setItemVisibility(menu, R.id.share_download_url_with_position_item, false);
-            setItemVisibility(menu, R.id.share_link_with_position_item, false);
         }
 
         boolean fileDownloaded = hasMedia && selectedItem.getMedia().fileExists();
-        setItemVisibility(menu, R.id.share_file, fileDownloaded);
 
         setItemVisibility(menu, R.id.remove_new_flag_item, selectedItem.isNew());
         if (selectedItem.isPlayed()) {
@@ -87,7 +78,7 @@ public class FeedItemMenuHandler {
             setItemVisibility(menu, R.id.reset_position, false);
         }
 
-        if(!UserPreferences.isEnableAutodownload() || fileDownloaded) {
+        if (!UserPreferences.isEnableAutodownload() || fileDownloaded || selectedItem.getFeed().isLocalFeed()) {
             setItemVisibility(menu, R.id.activate_auto_download, false);
             setItemVisibility(menu, R.id.deactivate_auto_download, false);
         } else if (selectedItem.getAutoDownload()) {
@@ -110,6 +101,11 @@ public class FeedItemMenuHandler {
         setItemVisibility(menu, R.id.remove_from_favorites_item, isFavorite);
 
         setItemVisibility(menu, R.id.remove_item, fileDownloaded);
+
+        if (selectedItem.getFeed().isLocalFeed()) {
+            setItemVisibility(menu, R.id.visit_website_item, false);
+            setItemVisibility(menu, R.id.share_item, false);
+        }
 
         return true;
     }
@@ -243,20 +239,9 @@ public class FeedItemMenuHandler {
             case R.id.visit_website_item:
                 IntentUtils.openInBrowser(context, FeedItemUtil.getLinkWithFallback(selectedItem));
                 break;
-            case R.id.share_link_item:
-                ShareUtils.shareFeedItemLink(context, selectedItem);
-                break;
-            case R.id.share_download_url_item:
-                ShareUtils.shareFeedItemDownloadLink(context, selectedItem);
-                break;
-            case R.id.share_link_with_position_item:
-                ShareUtils.shareFeedItemLink(context, selectedItem, true);
-                break;
-            case R.id.share_download_url_with_position_item:
-                ShareUtils.shareFeedItemDownloadLink(context, selectedItem, true);
-                break;
-            case R.id.share_file:
-                ShareUtils.shareFeedItemFile(context, selectedItem.getMedia());
+            case R.id.share_item:
+                ShareDialog shareDialog = ShareDialog.newInstance(selectedItem);
+                shareDialog.show((fragment.getActivity().getSupportFragmentManager()), "ShareEpisodeDialog");
                 break;
             default:
                 Log.d(TAG, "Unknown menuItemId: " + menuItemId);

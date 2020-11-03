@@ -1,8 +1,13 @@
 package de.danoeh.antennapod.fragment;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.ListFragment;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -21,10 +26,13 @@ import de.danoeh.antennapod.core.event.DownloaderUpdate;
 import de.danoeh.antennapod.core.feed.FeedMedia;
 import de.danoeh.antennapod.core.preferences.UserPreferences;
 import de.danoeh.antennapod.core.service.download.DownloadRequest;
+import de.danoeh.antennapod.core.service.download.DownloadService;
 import de.danoeh.antennapod.core.service.download.Downloader;
 import de.danoeh.antennapod.core.storage.DBReader;
 import de.danoeh.antennapod.core.storage.DBWriter;
 import de.danoeh.antennapod.core.storage.DownloadRequester;
+import de.danoeh.antennapod.core.util.download.AutoUpdateManager;
+import de.danoeh.antennapod.menuhandler.MenuItemUtils;
 import de.danoeh.antennapod.view.EmptyViewHandler;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -37,6 +45,8 @@ public class RunningDownloadsFragment extends ListFragment {
 
     private DownloadlistAdapter adapter;
     private List<Downloader> downloaderList = new ArrayList<>();
+
+    private boolean isUpdatingFeeds = false;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -76,6 +86,33 @@ public class RunningDownloadsFragment extends ListFragment {
         super.onDestroy();
         setListAdapter(null);
     }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        menu.findItem(R.id.clear_logs_item).setVisible(false);
+        menu.findItem(R.id.episode_actions).setVisible(false);
+        isUpdatingFeeds = MenuItemUtils.updateRefreshMenuItem(menu, R.id.refresh_item, updateRefreshMenuItemChecker);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.refresh_item) {
+            AutoUpdateManager.runImmediate(requireContext());
+            return true;
+        }
+        return false;
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(DownloadEvent event) {
+        Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");
+        if (event.hasChangedFeedUpdateStatus(isUpdatingFeeds)) {
+            ((PagedToolbarFragment) getParentFragment()).invalidateOptionsMenuIfActive(this);
+        }
+    }
+
+    private final MenuItemUtils.UpdateRefreshMenuItemChecker updateRefreshMenuItemChecker =
+            () -> DownloadService.isRunning && DownloadRequester.getInstance().isDownloadingFeeds();
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onEvent(DownloadEvent event) {

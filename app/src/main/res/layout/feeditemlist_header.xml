@@ -5,6 +5,8 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/headerContainer"
+        android:paddingHorizontal="@dimen/additional_horizontal_spacing"
         android:orientation="vertical">
 
     <LinearLayout
@@ -22,7 +24,7 @@
                 android:layout_marginRight="16dp"
                 android:layout_marginEnd="16dp"
                 android:importantForAccessibility="no"
-                tools:src="@drawable/ic_antenna"
+                tools:src="@tools:sample/avatars"
                 tools:background="@android:color/holo_green_dark"/>
 
         <LinearLayout

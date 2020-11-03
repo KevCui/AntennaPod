@@ -67,7 +67,8 @@
                 android:max="500"
                 tools:progress="100"
                 android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp" />
+                android:layout_marginRight="8dp"
+                android:clickable="true"/>
 
         <RelativeLayout
                 android:layout_width="match_parent"
@@ -184,7 +185,7 @@
                     android:layout_toStartOf="@id/butRev"
                     android:layout_centerVertical="true"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/set_playback_speed_label"
+                    android:contentDescription="@string/playback_speed"
                     tools:srcCompat="@drawable/ic_playback_speed_white"/>
 
             <TextView
