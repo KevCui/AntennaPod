@@ -84,10 +84,33 @@
             android:windowSoftInputMode="stateAlwaysHidden"
             android:launchMode="singleTask"
             android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="antennapod.org"
+                    android:pathPrefix="/deeplink/main"
+                    android:scheme="https" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="antennapod.org"
+                    android:pathPrefix="/deeplink/search"
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
 
         <activity
             android:name=".activity.DownloadAuthenticationActivity"
+            android:theme="@style/Theme.AntennaPod.Dark.Translucent"
             android:launchMode="singleInstance"/>
 
         <activity
@@ -189,15 +212,6 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.danoeh.antennapod.activity.MainActivity"/>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data android:scheme="file"/>
-                <data android:mimeType="video/*"/>
-            </intent-filter>
         </activity>
 
         <activity
@@ -292,19 +306,6 @@
 
         </activity>
 
-        <activity
-            android:name=".activity.gpoddernet.GpodnetAuthenticationActivity"
-            android:configChanges="orientation"
-            android:label="@string/gpodnet_auth_label">
-            <intent-filter>
-                <action android:name=".activity.gpoddernet.GpodnetAuthenticationActivity"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.danoeh.antennapod.activity.PreferenceActivity"/>
-        </activity>
-
         <receiver android:name=".receiver.ConnectivityActionReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
@@ -333,6 +334,10 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths"/>
         </provider>
+
+        <meta-data
+            android:name="com.google.android.actions"
+            android:resource="@xml/actions" />
     </application>
 
 </manifest>

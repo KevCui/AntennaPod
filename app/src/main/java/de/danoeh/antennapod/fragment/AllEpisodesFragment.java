@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import androidx.annotation.NonNull;
@@ -105,13 +104,12 @@ public class AllEpisodesFragment extends EpisodesListFragment {
     @NonNull
     @Override
     protected List<FeedItem> loadData() {
-        return feedItemFilter.filter(DBReader.getRecentlyPublishedEpisodes(0, page * EPISODES_PER_PAGE));
+        return DBReader.getRecentlyPublishedEpisodes(0, page * EPISODES_PER_PAGE, feedItemFilter);
     }
 
     @NonNull
     @Override
     protected List<FeedItem> loadMoreData() {
-        return feedItemFilter.filter(DBReader.getRecentlyPublishedEpisodes((page - 1) * EPISODES_PER_PAGE,
-                EPISODES_PER_PAGE));
+        return DBReader.getRecentlyPublishedEpisodes((page - 1) * EPISODES_PER_PAGE, EPISODES_PER_PAGE, feedItemFilter);
     }
 }

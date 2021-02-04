@@ -17,7 +17,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.core.text.TextUtilsCompat;
 import androidx.core.util.ObjectsCompat;
 import androidx.core.view.ViewCompat;
@@ -71,7 +70,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -120,6 +118,7 @@ public class ItemFragment extends Fragment {
     private View butAction2;
     private ItemActionButton actionButton1;
     private ItemActionButton actionButton2;
+    private View noMediaLabel;
 
     private Disposable disposable;
     private PlaybackController controller;
@@ -169,6 +168,7 @@ public class ItemFragment extends Fragment {
         butAction2Icon = layout.findViewById(R.id.butAction2Icon);
         butAction1Text = layout.findViewById(R.id.butAction1Text);
         butAction2Text = layout.findViewById(R.id.butAction2Text);
+        noMediaLabel = layout.findViewById(R.id.noMediaLabel);
 
         butAction1.setOnClickListener(v -> {
             if (actionButton1 instanceof StreamActionButton && !UserPreferences.isStreamOverDownload()
@@ -291,14 +291,19 @@ public class ItemFragment extends Fragment {
             txtvPublished.setContentDescription(DateUtils.formatForAccessibility(getContext(), item.getPubDate()));
         }
 
+        RequestOptions options = new RequestOptions()
+                .error(R.color.light_gray)
+                .diskCacheStrategy(ApGlideSettings.AP_DISK_CACHE_STRATEGY)
+                .transforms(new FitCenter(),
+                        new RoundedCorners((int) (4 * getResources().getDisplayMetrics().density)))
+                .dontAnimate();
+
         Glide.with(getActivity())
                 .load(ImageResourceUtils.getImageLocation(item))
-                .apply(new RequestOptions()
-                    .error(R.color.light_gray)
-                    .diskCacheStrategy(ApGlideSettings.AP_DISK_CACHE_STRATEGY)
-                    .transforms(new FitCenter(),
-                            new RoundedCorners((int) (4 * getResources().getDisplayMetrics().density)))
-                    .dontAnimate())
+                .error(Glide.with(getActivity())
+                        .load(ImageResourceUtils.getFallbackImageLocation(item))
+                        .apply(options))
+                .apply(options)
                 .into(imgvCover);
         updateButtons();
     }
@@ -319,7 +324,9 @@ public class ItemFragment extends Fragment {
         if (media == null) {
             actionButton1 = new MarkAsPlayedActionButton(item);
             actionButton2 = new VisitWebsiteActionButton(item);
+            noMediaLabel.setVisibility(View.VISIBLE);
         } else {
+            noMediaLabel.setVisibility(View.GONE);
             if (media.getDuration() > 0) {
                 txtvDuration.setText(Converter.getDurationStringLong(media.getDuration()));
                 txtvDuration.setContentDescription(

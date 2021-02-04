@@ -17,11 +17,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.activity.CastEnabledActivity;
 import de.danoeh.antennapod.activity.MainActivity;
@@ -43,7 +47,6 @@ import de.danoeh.antennapod.dialog.SkipPreferenceDialog;
 import de.danoeh.antennapod.dialog.SleepTimerDialog;
 import de.danoeh.antennapod.dialog.VariableSpeedDialog;
 import de.danoeh.antennapod.menuhandler.FeedItemMenuHandler;
-import de.danoeh.antennapod.view.PagerIndicatorView;
 import de.danoeh.antennapod.view.PlaybackSpeedIndicatorView;
 import io.reactivex.Maybe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -74,7 +77,6 @@ public class AudioPlayerFragment extends Fragment implements
     PlaybackSpeedIndicatorView butPlaybackSpeed;
     TextView txtvPlaybackSpeed;
     private ViewPager2 pager;
-    private PagerIndicatorView pageIndicator;
     private TextView txtvPosition;
     private TextView txtvLength;
     private SeekBar sbPosition;
@@ -86,10 +88,14 @@ public class AudioPlayerFragment extends Fragment implements
     private ImageButton butSkip;
     private Toolbar toolbar;
     private ProgressBar progressIndicator;
+    private CardView cardViewSeek;
+    private TextView txtvSeek;
 
     private PlaybackController controller;
     private Disposable disposable;
     private boolean showTimeLeft;
+    private boolean hasChapters = false;
+    private TabLayoutMediator tabLayoutMediator;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -120,6 +126,8 @@ public class AudioPlayerFragment extends Fragment implements
         txtvFF = root.findViewById(R.id.txtvFF);
         butSkip = root.findViewById(R.id.butSkip);
         progressIndicator = root.findViewById(R.id.progLoading);
+        cardViewSeek = root.findViewById(R.id.cardViewSeek);
+        txtvSeek = root.findViewById(R.id.txtvSeek);
 
         setupLengthTextView();
         setupControlButtons();
@@ -141,11 +149,35 @@ public class AudioPlayerFragment extends Fragment implements
                 });
             }
         });
-        pageIndicator = root.findViewById(R.id.page_indicator);
-        pageIndicator.setViewPager(pager);
-        pageIndicator.setOnClickListener(v ->
-                pager.setCurrentItem((pager.getCurrentItem() + 1) % NUM_CONTENT_FRAGMENTS));
+
+        TabLayout tabLayout = root.findViewById(R.id.sliding_tabs);
+        tabLayoutMediator = new TabLayoutMediator(tabLayout, pager, (tab, position) -> {
+            tab.view.setAlpha(1.0f);
+            switch (position) {
+                case POS_COVER:
+                    tab.setText(R.string.cover_label);
+                    break;
+                case POS_DESCR:
+                    tab.setText(R.string.description_label);
+                    break;
+                case POS_CHAPTERS:
+                    tab.setText(R.string.chapters_label);
+                    if (!hasChapters) {
+                        tab.view.setAlpha(0.5f);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
+        tabLayoutMediator.attach();
         return root;
+    }
+
+    public void setHasChapters(boolean hasChapters) {
+        this.hasChapters = hasChapters;
+        tabLayoutMediator.detach();
+        tabLayoutMediator.attach();
     }
 
     public View getExternalPlayerHolder() {
@@ -362,10 +394,6 @@ public class AudioPlayerFragment extends Fragment implements
         setupOptionsMenu(media);
     }
 
-    public void setHasChapters(boolean hasChapters) {
-        pageIndicator.setDisabledPage(hasChapters ? -1 : 2);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -432,22 +460,22 @@ public class AudioPlayerFragment extends Fragment implements
         }
         if (fromUser) {
             float prog = progress / ((float) seekBar.getMax());
-            int duration = controller.getDuration();
             TimeSpeedConverter converter = new TimeSpeedConverter(controller.getCurrentPlaybackSpeedMultiplier());
-            int position = converter.convert((int) (prog * duration));
-            txtvPosition.setText(Converter.getDurationStringLong(position));
-
-            if (showTimeLeft && prog != 0) {
-                int timeLeft = converter.convert(duration - (int) (prog * duration));
-                String length = "-" + Converter.getDurationStringLong(timeLeft);
-                txtvLength.setText(length);
-            }
+            int position = converter.convert((int) (prog * controller.getDuration()));
+            txtvSeek.setText(Converter.getDurationStringLong(position));
         }
     }
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
         // interrupt position Observer, restart later
+        cardViewSeek.setScaleX(.8f);
+        cardViewSeek.setScaleY(.8f);
+        cardViewSeek.animate()
+                .setInterpolator(new FastOutSlowInInterpolator())
+                .alpha(1f).scaleX(1f).scaleY(1f)
+                .setDuration(200)
+                .start();
     }
 
     @Override
@@ -456,6 +484,13 @@ public class AudioPlayerFragment extends Fragment implements
             float prog = seekBar.getProgress() / ((float) seekBar.getMax());
             controller.seekTo((int) (prog * controller.getDuration()));
         }
+        cardViewSeek.setScaleX(1f);
+        cardViewSeek.setScaleY(1f);
+        cardViewSeek.animate()
+                .setInterpolator(new FastOutSlowInInterpolator())
+                .alpha(0f).scaleX(.8f).scaleY(.8f)
+                .setDuration(200)
+                .start();
     }
 
     public void setupOptionsMenu(Playable media) {
