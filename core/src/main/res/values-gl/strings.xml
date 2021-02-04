@@ -94,7 +94,7 @@
   <string name="feed_volume_reduction_light">Claro</string>
   <string name="feed_volume_reduction_heavy">Forte</string>
   <string name="parallel_downloads_suffix">\u0020descargas paralelas</string>
-  <string name="feed_auto_download_global">Valor xeral por omisión</string>
+  <string name="feed_auto_download_global">Valor xeral por defecto</string>
   <string name="feed_auto_download_always">Sempre</string>
   <string name="feed_auto_download_never">Nunca</string>
   <string name="send_label">Enviar...</string>
@@ -442,7 +442,7 @@
   <string name="pref_rewind">Retroceso Salta tempo</string>
   <string name="pref_rewind_sum">Personaliza o número de segundos que se retrocede na reprodución cando se preme o botón retroceso</string>
   <string name="pref_gpodnet_sethostname_title">Establecer servidor</string>
-  <string name="pref_gpodnet_sethostname_use_default_host">Utilizar servidor por omisión</string>
+  <string name="pref_gpodnet_sethostname_use_default_host">Utilizar servidor por defecto</string>
   <string name="pref_expandNotify_title">Alta prioridade nas notificacións</string>
   <string name="pref_expandNotify_sum">Isto expande as notificacións para mostrar os botóns de reprodución</string>
   <string name="pref_persistNotify_title">Controles persistentes de reprodución</string>
@@ -485,6 +485,7 @@
   <string name="pref_enqueue_downloaded_title">Foron descargados os elementos da cola</string>
   <string name="pref_enqueue_downloaded_summary">Engadir os episodios descargados a cola</string>
   <string name="media_player_builtin">Reprodutor android nativo</string>
+  <string name="media_player_exoplayer_recommended">ExoPlayer (recomendado)</string>
   <string name="media_player_switch_to_exoplayer">Cambiar a ExoPlayer</string>
   <string name="media_player_switched_to_exoplayer">Cambiaches a ExoPlayer.</string>
   <string name="pref_skip_silence_title">Saltar silencio no Audio</string>
@@ -509,6 +510,7 @@
   <string name="pref_filter_feed_sum">Filtra as subscricións no panel de navegación e pantalla de subscricións.</string>
   <string name="no_filter_label">Nada</string>
   <string name="subscriptions_are_filtered">As subscricións están filtradas.</string>
+  <string name="subscriptions_counter_greater_zero">Contador maior a cero</string>
   <string name="auto_downloaded">Descargado automáticamente</string>
   <string name="not_auto_downloaded">Non descargado automáticamente</string>
   <string name="kept_updated">Manter actualizado</string>
@@ -641,7 +643,7 @@
   <string name="folder_not_writable_error">non se pode escribir en \"%1$s\"</string>
   <string name="folder_not_empty_dialog_title">O cartafol non está baleiro</string>
   <string name="folder_not_empty_dialog_msg">O cartafol escollido non está baleiro. As descargas de medios e outros ficheiros situaranse directamente neste cartafol. Utilizalo igualmente?</string>
-  <string name="set_to_default_folder">Escolle o cartafol por omisión</string>
+  <string name="set_to_default_folder">Escolle o cartafol por defecto</string>
   <string name="pref_pausePlaybackForFocusLoss_sum">Pausar a reprodución en lugar de baixar o volume cando outra aplicación quere reproducir un son.</string>
   <string name="pref_pausePlaybackForFocusLoss_title">Pausa para interrupcións</string>
   <string name="pref_resumeAfterCall_sum">Retomar a reprodución despois de rematar a chamada telefónica</string>
@@ -703,9 +705,11 @@
   <string name="search_powered_by">Resultados por %1$s</string>
   <!--Local feeds-->
   <string name="add_local_folder">Engadir cartafol local</string>
+  <string name="local_folder">Cartafol local</string>
   <string name="reconnect_local_folder">Reconectar cartafol local</string>
   <string name="reconnect_local_folder_warning">En caso de faltar permisos, podes usar esto para reconectar o exactamente o mesmo cartafol. Non elixas outro cartafol.</string>
   <string name="local_feed_description">O podcast virtual foi creado ó engadir un cartafol a AntennaPod.</string>
+  <string name="unable_to_start_system_file_manager">Non foi posible abrir o xestor de ficheiros</string>
   <string name="filter">Filtrado</string>
   <!--Episodes apply actions-->
   <string name="all_label">Todo</string>
