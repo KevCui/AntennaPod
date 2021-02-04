@@ -16,7 +16,6 @@ Forked from [official repo](https://github.com/AntennaPod/AntennaPod), plus minu
   - Network
     - Automatic Download: true
     - Episode Cache: Unlimited
-    - Show Download Report: false
   - Storage
     - Image Cache Size: 500 MiB
     - Auto Delete: true
@@ -25,3 +24,13 @@ Forked from [official repo](https://github.com/AntennaPod/AntennaPod), plus minu
   - Queue Sort
     - Sorted order: Podcast title A-Z
     - Keep sorted: true
+
+## How to build & test
+
+```bash
+$ ./gradlew installFreeDebug
+```
+
+```
+
+```
