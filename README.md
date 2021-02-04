@@ -30,7 +30,3 @@ Forked from [official repo](https://github.com/AntennaPod/AntennaPod), plus minu
 ```bash
 $ ./gradlew installFreeDebug
 ```
-
-```
-
-```
