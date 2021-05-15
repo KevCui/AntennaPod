@@ -45,16 +45,6 @@
         <item>60</item>
     </integer-array>
 
-    <string-array name="update_intervall_values">
-        <item>1</item>
-        <item>2</item>
-        <item>4</item>
-        <item>8</item>
-        <item>12</item>
-        <item>24</item>
-        <item>72</item>
-    </string-array>
-
     <string-array name="episode_cache_size_entries">
         <item>5</item>
         <item>10</item>
@@ -96,6 +86,7 @@
     </string-array>
 
     <string-array name="episode_cleanup_entries">
+        <item>@string/episode_cleanup_except_favorite_removal</item>
         <item>@string/episode_cleanup_queue_removal</item>
         <item>0</item>
         <item>1</item>
@@ -133,6 +124,7 @@
     </string-array>
 
     <string-array name="episode_cleanup_values">
+        <item>-3</item>
         <item>-1</item>
         <item>0</item>
         <item>12</item>

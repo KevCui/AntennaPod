@@ -19,15 +19,17 @@ import com.bumptech.glide.request.RequestOptions;
 import java.util.concurrent.TimeUnit;
 
 import de.danoeh.antennapod.core.R;
+import de.danoeh.antennapod.model.playback.MediaType;
 import de.danoeh.antennapod.core.glide.ApGlideSettings;
 import de.danoeh.antennapod.core.receiver.MediaButtonReceiver;
 import de.danoeh.antennapod.core.receiver.PlayerWidget;
-import de.danoeh.antennapod.core.service.playback.PlaybackService;
 import de.danoeh.antennapod.core.service.playback.PlayerStatus;
 import de.danoeh.antennapod.core.util.Converter;
 import de.danoeh.antennapod.core.feed.util.ImageResourceUtils;
 import de.danoeh.antennapod.core.util.TimeSpeedConverter;
-import de.danoeh.antennapod.core.util.playback.Playable;
+import de.danoeh.antennapod.model.playback.Playable;
+import de.danoeh.antennapod.ui.appstartintent.MainActivityStarter;
+import de.danoeh.antennapod.ui.appstartintent.VideoPlayerActivityStarter;
 
 /**
  * Updates the state of the player widget.
@@ -41,17 +43,20 @@ public abstract class WidgetUpdater {
         final int position;
         final int duration;
         final float playbackSpeed;
+        final boolean isCasting;
 
-        public WidgetState(Playable media, PlayerStatus status, int position, int duration, float playbackSpeed) {
+        public WidgetState(Playable media, PlayerStatus status, int position, int duration,
+                           float playbackSpeed, boolean isCasting) {
             this.media = media;
             this.status = status;
             this.position = position;
             this.duration = duration;
             this.playbackSpeed = playbackSpeed;
+            this.isCasting = isCasting;
         }
 
         public WidgetState(PlayerStatus status) {
-            this(null, status, Playable.INVALID_TIME, Playable.INVALID_TIME, 1.0f);
+            this(null, status, Playable.INVALID_TIME, Playable.INVALID_TIME, 1.0f, false);
         }
     }
 
@@ -65,8 +70,14 @@ public abstract class WidgetUpdater {
         ComponentName playerWidget = new ComponentName(context, PlayerWidget.class);
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         int[] widgetIds = manager.getAppWidgetIds(playerWidget);
-        final PendingIntent startMediaPlayer = PendingIntent.getActivity(context, R.id.pending_intent_player_activity,
-                PlaybackService.getPlayerActivityIntent(context), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        PendingIntent startMediaPlayer;
+        if (widgetState.media != null && widgetState.media.getMediaType() == MediaType.VIDEO
+                && !widgetState.isCasting) {
+            startMediaPlayer = new VideoPlayerActivityStarter(context).getPendingIntent();
+        } else {
+            startMediaPlayer = new MainActivityStarter(context).withOpenPlayer().getPendingIntent();
+        }
         RemoteViews views;
         views = new RemoteViews(context.getPackageName(), R.layout.player_widget);
 
@@ -79,7 +90,7 @@ public abstract class WidgetUpdater {
             try {
                 icon = Glide.with(context)
                         .asBitmap()
-                        .load(ImageResourceUtils.getImageLocation(widgetState.media))
+                        .load(widgetState.media.getImageLocation())
                         .apply(RequestOptions.diskCacheStrategyOf(ApGlideSettings.AP_DISK_CACHE_STRATEGY))
                         .submit(iconSize, iconSize)
                         .get(500, TimeUnit.MILLISECONDS);
@@ -111,14 +122,14 @@ public abstract class WidgetUpdater {
             }
 
             if (widgetState.status == PlayerStatus.PLAYING) {
-                views.setImageViewResource(R.id.butPlay, R.drawable.ic_av_pause_white_48dp);
+                views.setImageViewResource(R.id.butPlay, R.drawable.ic_pause);
                 views.setContentDescription(R.id.butPlay, context.getString(R.string.pause_label));
-                views.setImageViewResource(R.id.butPlayExtended, R.drawable.ic_av_pause_white_48dp);
+                views.setImageViewResource(R.id.butPlayExtended, R.drawable.ic_pause);
                 views.setContentDescription(R.id.butPlayExtended, context.getString(R.string.pause_label));
             } else {
-                views.setImageViewResource(R.id.butPlay, R.drawable.ic_av_play_white_48dp);
+                views.setImageViewResource(R.id.butPlay, R.drawable.ic_play_48dp);
                 views.setContentDescription(R.id.butPlay, context.getString(R.string.play_label));
-                views.setImageViewResource(R.id.butPlayExtended, R.drawable.ic_av_play_white_48dp);
+                views.setImageViewResource(R.id.butPlayExtended, R.drawable.ic_play_48dp);
                 views.setContentDescription(R.id.butPlayExtended, context.getString(R.string.play_label));
             }
             views.setOnClickPendingIntent(R.id.butPlay,
@@ -141,8 +152,8 @@ public abstract class WidgetUpdater {
             views.setViewVisibility(R.id.txtvTitle, View.GONE);
             views.setViewVisibility(R.id.txtNoPlaying, View.VISIBLE);
             views.setImageViewResource(R.id.imgvCover, R.mipmap.ic_launcher_round);
-            views.setImageViewResource(R.id.butPlay, R.drawable.ic_av_play_white_48dp);
-            views.setImageViewResource(R.id.butPlayExtended, R.drawable.ic_av_play_white_48dp);
+            views.setImageViewResource(R.id.butPlay, R.drawable.ic_play_48dp);
+            views.setImageViewResource(R.id.butPlayExtended, R.drawable.ic_play_48dp);
         }
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
